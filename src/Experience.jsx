@@ -7,18 +7,21 @@ import {
     AccumulativeShadows,
     RandomizedLight,
     ContactShadows,
-    Sky
+    Sky,
+    Environment,
+    Lightformer
 } from '@react-three/drei'
-import { useRef } from 'react'
+import { useRef, Suspense } from 'react'
 import { Perf } from 'r3f-perf'
 import * as THREE from 'three'
 import { useControls } from 'leva'
-
+import Cubes from './Cubes'
 
 export default function Experience() {
     const directionalLight = useRef()
     useHelper(directionalLight, THREE.DirectionalLightHelper, 1)
     const cube = useRef()
+
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime
@@ -32,11 +35,48 @@ export default function Experience() {
         blur: { value: 2.8, min: 0, max: 10 }
     })
 
-    const {sunPosition} = useControls('sky', {
-        sunPosition: {value: [1,2,3]}
+    const { sunPosition } = useControls('sky', {
+        sunPosition: { value: [1, 2, 3] }
+    })
+
+    const { envMapIntesity } = useControls('environment map', {
+        envMapIntesity: { value: 3.5, min: 0, max: 12 }
+
+    })
+
+    const { colorBackground } = useControls('colorOfABackground', {
+        colorBackground: '#000000'
     })
 
     return <>
+
+        <Environment
+            background
+            // files={[
+            //     './environmentMaps/2/px.jpg',
+            //     './environmentMaps/2/nx.jpg',
+            //     './environmentMaps/2/py.jpg',
+            //     './environmentMaps/2/ny.jpg',
+            //     './environmentMaps/2/pz.jpg',
+            //     './environmentMaps/2/nz.jpg'
+            // ]}
+            // files={'./environmentMaps/the_sky_is_on_fire_2k.hdr'}
+            preset='sunset'
+            resolution={32}
+        >
+            <color args={[colorBackground]} attach={"background"} />
+            {/* <Lightformer 
+            position-z={-5}
+            scale={10}
+            color='red'
+            form={'ring'}
+            /> */}
+            {/* <mesh position-z={-5} scale={5}>
+                <planeGeometry />
+                <meshBasicMaterial color={[1,0,0]}/>
+            </mesh> */}
+
+        </Environment>
 
         {/* <BakeShadows /> */}
         {/* <SoftShadows size={25} samples={10} focus={0} /> */}
@@ -44,7 +84,10 @@ export default function Experience() {
             args={['ivory']}
             attach="background" />
 
-        <Perf position="top-left" />
+        <Perf
+            position="top-left"
+            showGraph="false"
+        />
 
         <OrbitControls makeDefault />
 
@@ -77,7 +120,7 @@ export default function Experience() {
             opacity={opacity}
             blur={blur}
         />
-        <directionalLight
+        {/* <directionalLight
             ref={directionalLight}
             position={sunPosition}
             intensity={4.5}
@@ -90,17 +133,18 @@ export default function Experience() {
             shadow-camera-right={5}
             shadow-camera-bottom={-5}
             shadow-camera-left={-5}
-        />
+        /> */}
 
-        <ambientLight intensity={1.5} />
+        {/* <ambientLight intensity={1.5} /> */}
 
 
-        <Sky sunPosition={sunPosition}/>
+        {/* <Sky sunPosition={sunPosition}/> */}
+
         <mesh
             castShadow
             position-x={- 2}>
             <sphereGeometry />
-            <meshStandardMaterial color="orange" />
+            <meshStandardMaterial color="orange" envMapIntensity={envMapIntesity} />
         </mesh>
 
         <mesh
@@ -109,7 +153,7 @@ export default function Experience() {
             position-x={2}
             scale={1.5}>
             <boxGeometry />
-            <meshStandardMaterial color="mediumpurple" />
+            <meshStandardMaterial color="mediumpurple" envMapIntensity={envMapIntesity} />
         </mesh>
 
         <mesh
@@ -117,8 +161,14 @@ export default function Experience() {
             rotation-x={- Math.PI * 0.5}
             scale={10}>
             <planeGeometry />
-            <meshStandardMaterial color="greenyellow" />
+            <meshStandardMaterial color="greenyellow" envMapIntensity={envMapIntesity} />
         </mesh>
 
+        <Suspense fallback={null}>
+            <Cubes
+                position={[0, 0, 0]}
+                rotation={[0, 0, Math.PI]}
+                scale={1}/>
+        </Suspense>
     </>
 }
